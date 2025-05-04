@@ -166,8 +166,8 @@
 
 <div id="deathPopup">
   <p>YOU DIED BECAUSE YOU SUCK</p>
-  <button onclick="document.getElementById('deathPopup').style.display='none'">y35</button>
-  <button onclick="document.getElementById('deathPopup').style.display='none'">n4u6h7y</button>
+  <button onclick="hideDeathPopup()">y35</button>
+  <button onclick="hideDeathPopup()">n4u6h7y</button>
 </div>
 
 <audio id="chimeSound" src="chime.mp3"></audio>
@@ -188,6 +188,12 @@ const testChimeButton = document.getElementById('testChimeButton');
 const popOutButton = document.getElementById('popOutButton');
 const deathPopup = document.getElementById('deathPopup');
 let muted = false;
+let deathShown = false;
+
+function hideDeathPopup() {
+  deathPopup.style.display = 'none';
+  deathShown = true;
+}
 
 muteButton.addEventListener('click', () => {
   muted = !muted;
@@ -259,6 +265,7 @@ function updateTimer() {
     playChime();
     nextBlockTime = getNextBlockTime();
     msLeft = nextBlockTime - now;
+    deathShown = false;
   }
 
   const totalSeconds = Math.floor(msLeft / 1000);
@@ -293,11 +300,11 @@ function updateTimer() {
 
   blocks[blockKeys[quarter]].insertAdjacentHTML('afterbegin', `<div class="${runnerClass}">🏃🏻‍♀️</div>`);
 
-  const isFinalMinute = minutes === 0 && seconds < 60;
-  const santaSize = isFinalMinute ? 'big-santa' : '';
+  const isFinalThirty = minutes === 0 && seconds >= 30;
+  const santaSize = isFinalThirty ? 'big-santa' : '';
   blocks.block00.insertAdjacentHTML('beforeend', `<div class="emoji-static ${santaSize}">🎅🏻</div>`);
 
-  if (isFinalMinute) {
+  if (isFinalThirty && !deathShown) {
     deathPopup.style.display = 'block';
   }
 
