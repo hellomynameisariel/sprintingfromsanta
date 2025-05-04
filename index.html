@@ -37,8 +37,16 @@
       position: absolute;
       top: -50px;
       font-size: 40px;
-      width: 100%;
-      text-align: center;
+    }
+    .emoji-left {
+      left: 0;
+    }
+    .emoji-center {
+      left: 50%;
+      transform: translateX(-50%);
+    }
+    .emoji-right {
+      right: 0;
     }
     .emoji-static {
       position: absolute;
@@ -237,6 +245,7 @@ function updateTimer() {
   const seconds = totalSeconds % 60;
   const currentMinutes = now.getMinutes();
   const quarter = Math.floor(currentMinutes / 15);
+  const minuteOffset = currentMinutes % 15;
 
   const timeText = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
   timerDisplay.textContent = timeText;
@@ -257,8 +266,11 @@ function updateTimer() {
     el.style.color = textColors[colors[index]];
   });
 
-  const runner = '<div class="emoji-above">🏃🏻‍♀️</div>';
-  blocks[blockKeys[quarter]].insertAdjacentHTML('afterbegin', runner);
+  let runnerClass = 'emoji-above emoji-left';
+  if (minuteOffset >= 10) runnerClass = 'emoji-above emoji-right';
+  else if (minuteOffset >= 5) runnerClass = 'emoji-above emoji-center';
+
+  blocks[blockKeys[quarter]].insertAdjacentHTML('afterbegin', `<div class="${runnerClass}">🏃🏻‍♀️</div>`);
 
   const isFinalMinute = minutes === 0 && seconds < 60;
   const santaSize = isFinalMinute ? 'big-santa' : '';
