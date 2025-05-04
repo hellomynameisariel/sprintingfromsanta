@@ -38,16 +38,9 @@
       top: -50px;
       font-size: 40px;
     }
-    .emoji-left {
-      left: 0;
-    }
-    .emoji-center {
-      left: 50%;
-      transform: translateX(-50%);
-    }
-    .emoji-right {
-      right: 0;
-    }
+    .emoji-left { left: 0; }
+    .emoji-center { left: 50%; transform: translateX(-50%); }
+    .emoji-right { right: 0; }
     .emoji-static {
       position: absolute;
       top: -50px;
@@ -113,6 +106,27 @@
     .big-santa {
       font-size: 60px !important;
     }
+    #deathPopup {
+      display: none;
+      position: fixed;
+      top: 30%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: #111;
+      color: #f55;
+      border: 2px solid #f55;
+      padding: 20px;
+      text-align: center;
+      z-index: 9999;
+    }
+    #deathPopup button {
+      margin: 10px;
+      padding: 5px 10px;
+      background-color: #222;
+      color: #fff;
+      border: 1px solid #f55;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
@@ -150,6 +164,12 @@
   <a href="https://hellomynameisariel.github.io/flowtools/" target="_blank">See All Flow Tools by Ariel</a>
 </div>
 
+<div id="deathPopup">
+  <p>YOU DIED BECAUSE YOU SUCK</p>
+  <button onclick="document.getElementById('deathPopup').style.display='none'">y35</button>
+  <button onclick="document.getElementById('deathPopup').style.display='none'">n4u6h7y</button>
+</div>
+
 <audio id="chimeSound" src="chime.mp3"></audio>
 
 <script>
@@ -166,6 +186,7 @@ const sizeSlider = document.getElementById('sizeSlider');
 const volumeSlider = document.getElementById('volumeSlider');
 const testChimeButton = document.getElementById('testChimeButton');
 const popOutButton = document.getElementById('popOutButton');
+const deathPopup = document.getElementById('deathPopup');
 let muted = false;
 
 muteButton.addEventListener('click', () => {
@@ -275,6 +296,10 @@ function updateTimer() {
   const isFinalMinute = minutes === 0 && seconds < 60;
   const santaSize = isFinalMinute ? 'big-santa' : '';
   blocks.block00.insertAdjacentHTML('beforeend', `<div class="emoji-static ${santaSize}">🎅🏻</div>`);
+
+  if (isFinalMinute) {
+    deathPopup.style.display = 'block';
+  }
 
   const delay = 1000 - now.getMilliseconds();
   setTimeout(updateTimer, delay);
