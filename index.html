@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🎅🏻 TIME TO SPRINT</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎅🏻</text></svg>">
+  <style>
+    body {
+      background-color: #000;
+      color: #ccc;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      height: 100vh;
+      margin: 0;
+      font-family: Arial, sans-serif;
+      padding-top: 10px;
+    }
+    table {
+      border-collapse: collapse;
+      margin: 0 auto;
+      position: relative;
+    }
+    td {
+      width: 50px;
+      height: 40px;
+      text-align: center;
+      vertical-align: middle;
+      font-size: 1em;
+      border: 1px solid #555;
+      padding: 2px;
+      position: relative;
+    }
+    .emoji-above {
+      position: absolute;
+      top: -25px;
+      font-size: 18px;
+      width: 100%;
+      text-align: center;
+    }
+    .emoji-static {
+      position: absolute;
+      top: -25px;
+      right: -15px;
+      font-size: 18px;
+    }
+    #timer {
+      font-size: var(--timer-font-size, 12vw);
+      text-align: center;
+      margin-top: 5px;
+    }
+    #controls {
+      margin-top: 15px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+    .button-row {
+      display: flex;
+      gap: 10px;
+    }
+    .slider-bar {
+      display: flex;
+      align-items: center;
+      background-color: #333;
+      padding: 5px 10px;
+      border-radius: 8px;
+    }
+    .slider-bar span {
+      margin: 0 5px;
+      font-size: 1.2em;
+    }
+    .slider-label {
+      margin-top: 10px;
+      font-size: 1em;
+      color: #ccc;
+    }
+    button {
+      background-color: #222;
+      color: #ccc;
+      border: 1px solid #555;
+      padding: 5px 10px;
+      font-size: 1em;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #333;
+    }
+    input[type=range] {
+      width: 200px;
+      background: transparent;
+    }
+    .footer-link {
+      font-size: 0.7em;
+      color: #888;
+      margin-top: 12px;
+    }
+    .footer-link a {
+      color: #888;
+      text-decoration: none;
+    }
+    .big-santa {
+      font-size: 40px !important;
+    }
+  </style>
+</head>
+<body>
+
+<table>
+  <tr>
+    <td id="block15">:15</td>
+    <td id="block30">:30</td>
+    <td id="block45">:45</td>
+    <td id="block00">:00</td>
+  </tr>
+</table>
+
+<div id="timer">00:00</div>
+<div class="slider-label">Resize</div>
+<div id="controls">
+  <div class="slider-bar">
+    <span>-</span>
+    <input type="range" id="sizeSlider" min="4" max="30" value="12">
+    <span>+</span>
+  </div>
+  <div class="button-row">
+    <button id="muteButton">Mute</button>
+    <button id="testChimeButton">Test Chime</button>
+    <button id="popOutButton">Pop Out</button>
+  </div>
+  <div class="slider-bar">
+    <span>-</span>
+    <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="1">
+    <span>+</span>
+  </div>
+</div>
+
+<div class="footer-link">
+  <a href="https://hellomynameisariel.github.io/flowtools/" target="_blank">See All Flow Tools by Ariel</a>
+</div>
+
+<audio id="chimeSound" src="chime.mp3"></audio>
+
+<script>
+const blocks = {
+  block15: document.getElementById('block15'),
+  block30: document.getElementById('block30'),
+  block45: document.getElementById('block45'),
+  block00: document.getElementById('block00')
+};
+const timerDisplay = document.getElementById('timer');
+const muteButton = document.getElementById('muteButton');
+const chimeSound = document.getElementById('chimeSound');
+const sizeSlider = document.getElementById('sizeSlider');
+const volumeSlider = document.getElementById('volumeSlider');
+const testChimeButton = document.getElementById('testChimeButton');
+const popOutButton = document.getElementById('popOutButton');
+let muted = false;
+
+muteButton.addEventListener('click', () => {
+  muted = !muted;
+  muteButton.textContent = muted ? 'Unmute' : 'Mute';
+});
+
+sizeSlider.addEventListener('input', () => {
+  document.documentElement.style.setProperty('--timer-font-size', sizeSlider.value + 'vw');
+  localStorage.setItem('timerFontSize', sizeSlider.value);
+});
+
+volumeSlider.addEventListener('input', () => {
+  chimeSound.volume = volumeSlider.value;
+  localStorage.setItem('chimeVolume', volumeSlider.value);
+});
+
+// Load saved settings
+const savedFontSize = localStorage.getItem('timerFontSize');
+if (savedFontSize) {
+  sizeSlider.value = savedFontSize;
+  document.documentElement.style.setProperty('--timer-font-size', savedFontSize + 'vw');
+}
+const savedVolume = localStorage.getItem('chimeVolume');
+if (savedVolume) {
+  volumeSlider.value = savedVolume;
+  chimeSound.volume = savedVolume;
+}
+
+testChimeButton.addEventListener('click', () => {
+  if (!muted) {
+    chimeSound.pause();
+    chimeSound.currentTime = 0;
+    chimeSound.play().catch(() => {});
+  }
+});
+
+popOutButton.addEventListener('click', () => {
+  window.open(window.location.href, '_blank', 'width=400,height=400,menubar=no,toolbar=no,location=no,status=no');
+});
+
+function playChime() {
+  if (!muted) {
+    chimeSound.pause();
+    chimeSound.currentTime = 0;
+    chimeSound.play().catch(() => {});
+  }
+}
+
+function getNextBlockTime() {
+  const now = new Date();
+  const minutes = now.getMinutes();
+  const nextBlock = Math.ceil((minutes + 0.01) / 15) * 15;
+  const next = new Date(now);
+  next.setMinutes(nextBlock % 60);
+  next.setSeconds(0);
+  next.setMilliseconds(0);
+  if (nextBlock >= 60) {
+    next.setHours(now.getHours() + 1);
+  }
+  return next;
+}
+
+let nextBlockTime = getNextBlockTime();
+
+function updateTimer() {
+  const now = new Date();
+  let msLeft = nextBlockTime - now;
+
+  if (msLeft <= 0) {
+    playChime();
+    nextBlockTime = getNextBlockTime();
+    msLeft = nextBlockTime - now;
+  }
+
+  const totalSeconds = Math.floor(msLeft / 1000);
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  const currentMinutes = now.getMinutes();
+  const quarter = Math.floor(currentMinutes / 15);
+
+  const timeText = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+  timerDisplay.textContent = timeText;
+  document.title = `🎅🏻 ${timeText} TIME TO SPRINT`;
+
+  // Reset emojis
+  for (let key in blocks) {
+    blocks[key].innerHTML = blocks[key].innerHTML.replace(/<div.*?emoji.*?<\/div>/g, '');
+  }
+
+  // Apply colors and emoji to blocks
+  const colors = ['yellow', 'yellow', 'yellow', 'yellow'];
+  colors[quarter] = 'green';
+  for (let i = 0; i < quarter; i++) colors[i] = 'red';
+  const textColors = { yellow: '#000', green: '#fff', red: '#fff' };
+  const blockKeys = ['block15', 'block30', 'block45', 'block00'];
+  blockKeys.forEach((key, index) => {
+    const el = blocks[key];
+    el.style.backgroundColor = colors[index];
+    el.style.color = textColors[colors[index]];
+  });
+
+  // Add runner emoji above current block
+  const runner = '<div class="emoji-above">🏃🏻‍♀️</div>';
+  blocks[blockKeys[quarter]].insertAdjacentHTML('afterbegin', runner);
+
+  // Add Santa emoji near the :00 block
+  const isFinalMinute = minutes === 0 && seconds < 60;
+  const santaSize = isFinalMinute ? 'big-santa' : '';
+  blocks.block00.insertAdjacentHTML('beforeend', `<div class="emoji-static ${santaSize}">🎅🏻</div>`);
+
+  const delay = 1000 - now.getMilliseconds();
+  setTimeout(updateTimer, delay);
+}
+
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) {
+    nextBlockTime = getNextBlockTime();
+    updateTimer();
+  }
+});
+
+updateTimer();
+</script>
+
+</body>
+</html>
