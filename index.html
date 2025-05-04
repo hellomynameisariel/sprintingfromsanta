@@ -47,6 +47,12 @@
       right: -15px;
       font-size: 40px;
     }
+    .big-santa {
+      font-size: 60px !important;
+    }
+    .mega-santa {
+      font-size: 4000px !important;
+    }
     #timer {
       font-size: var(--timer-font-size, 12vw);
       text-align: center;
@@ -102,9 +108,6 @@
     .footer-link a {
       color: #888;
       text-decoration: none;
-    }
-    .big-santa {
-      font-size: 60px !important;
     }
     #deathPopup {
       display: none;
@@ -195,6 +198,86 @@ function hideDeathPopup() {
   deathShown = true;
 }
 
+function playChime() {
+  if (!muted) {
+    chimeSound.pause();
+    chimeSound.currentTime = 0;
+    chimeSound.play().catch(() => {});
+  }
+}
+
+function getNextBlockTime() {
+  const now = new Date();
+  const minutes = now.getMinutes();
+  const nextBlock = Math.ceil((minutes + 0.01) / 15) * 15;
+  const next = new Date(now);
+  next.setMinutes(nextBlock % 60);
+  next.setSeconds(0);
+  next.setMilliseconds(0);
+  if (nextBlock >= 60) {
+    next.setHours(now.getHours() + 1);
+  }
+  return next;
+}
+
+let nextBlockTime = getNextBlockTime();
+
+function updateTimer() {
+  const now = new Date();
+  let msLeft = nextBlockTime - now;
+  const totalSeconds = Math.floor(msLeft / 1000);
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  const realSeconds = now.getSeconds();
+
+  if (msLeft <= 0) {
+    playChime();
+    nextBlockTime = getNextBlockTime();
+    msLeft = nextBlockTime - now;
+    deathShown = false;
+  }
+
+  const currentMinutes = now.getMinutes();
+  const quarter = Math.floor(currentMinutes / 15);
+  const minuteOffset = currentMinutes % 15;
+  const timeText = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+  timerDisplay.textContent = timeText;
+  document.title = `🎅🏻 ${timeText} TIME TO SPRINT`;
+
+  for (let key in blocks) {
+    blocks[key].innerHTML = blocks[key].innerHTML.replace(/<div.*?emoji.*?<\/div>/g, '');
+  }
+
+  const colors = ['yellow', 'yellow', 'yellow', 'yellow'];
+  colors[quarter] = 'green';
+  for (let i = 0; i < quarter; i++) colors[i] = 'red';
+  const textColors = { yellow: '#000', green: '#fff', red: '#fff' };
+  const blockKeys = ['block15', 'block30', 'block45', 'block00'];
+  blockKeys.forEach((key, index) => {
+    const el = blocks[key];
+    el.style.backgroundColor = colors[index];
+    el.style.color = textColors[colors[index]];
+  });
+
+  let runnerClass = 'emoji-above emoji-left';
+  if (minuteOffset >= 10) runnerClass = 'emoji-above emoji-right';
+  else if (minuteOffset >= 5) runnerClass = 'emoji-above emoji-center';
+
+  blocks[blockKeys[quarter]].insertAdjacentHTML('afterbegin', `<div class="${runnerClass}">🏃🏻‍♀️</div>`);
+
+  const isFinalThirty = minutes === 0 && seconds >= 30;
+  const isFinalTen = minutes === 0 && seconds >= 50;
+  let santaSize = isFinalTen ? 'mega-santa' : isFinalThirty ? 'big-santa' : '';
+  blocks.block00.insertAdjacentHTML('beforeend', `<div class="emoji-static ${santaSize}">🎅🏻</div>`);
+
+  if (isFinalThirty && !deathShown) {
+    deathPopup.style.display = 'block';
+  }
+
+  const delay = 1000 - now.getMilliseconds();
+  setTimeout(updateTimer, delay);
+}
+
 muteButton.addEventListener('click', () => {
   muted = !muted;
   muteButton.textContent = muted ? 'Unmute' : 'Mute';
@@ -232,85 +315,6 @@ testChimeButton.addEventListener('click', () => {
 popOutButton.addEventListener('click', () => {
   window.open(window.location.href, '_blank', 'width=400,height=400,menubar=no,toolbar=no,location=no,status=no');
 });
-
-function playChime() {
-  if (!muted) {
-    chimeSound.pause();
-    chimeSound.currentTime = 0;
-    chimeSound.play().catch(() => {});
-  }
-}
-
-function getNextBlockTime() {
-  const now = new Date();
-  const minutes = now.getMinutes();
-  const nextBlock = Math.ceil((minutes + 0.01) / 15) * 15;
-  const next = new Date(now);
-  next.setMinutes(nextBlock % 60);
-  next.setSeconds(0);
-  next.setMilliseconds(0);
-  if (nextBlock >= 60) {
-    next.setHours(now.getHours() + 1);
-  }
-  return next;
-}
-
-let nextBlockTime = getNextBlockTime();
-
-function updateTimer() {
-  const now = new Date();
-  let msLeft = nextBlockTime - now;
-
-  if (msLeft <= 0) {
-    playChime();
-    nextBlockTime = getNextBlockTime();
-    msLeft = nextBlockTime - now;
-    deathShown = false;
-  }
-
-  const totalSeconds = Math.floor(msLeft / 1000);
-  const minutes = Math.floor(totalSeconds / 60);
-  const seconds = totalSeconds % 60;
-  const currentMinutes = now.getMinutes();
-  const quarter = Math.floor(currentMinutes / 15);
-  const minuteOffset = currentMinutes % 15;
-
-  const timeText = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-  timerDisplay.textContent = timeText;
-  document.title = `🎅🏻 ${timeText} TIME TO SPRINT`;
-
-  for (let key in blocks) {
-    blocks[key].innerHTML = blocks[key].innerHTML.replace(/<div.*?emoji.*?<\/div>/g, '');
-  }
-
-  const colors = ['yellow', 'yellow', 'yellow', 'yellow'];
-  colors[quarter] = 'green';
-  for (let i = 0; i < quarter; i++) colors[i] = 'red';
-  const textColors = { yellow: '#000', green: '#fff', red: '#fff' };
-  const blockKeys = ['block15', 'block30', 'block45', 'block00'];
-  blockKeys.forEach((key, index) => {
-    const el = blocks[key];
-    el.style.backgroundColor = colors[index];
-    el.style.color = textColors[colors[index]];
-  });
-
-  let runnerClass = 'emoji-above emoji-left';
-  if (minuteOffset >= 10) runnerClass = 'emoji-above emoji-right';
-  else if (minuteOffset >= 5) runnerClass = 'emoji-above emoji-center';
-
-  blocks[blockKeys[quarter]].insertAdjacentHTML('afterbegin', `<div class="${runnerClass}">🏃🏻‍♀️</div>`);
-
-  const isFinalThirty = minutes === 0 && seconds >= 30;
-  const santaSize = isFinalThirty ? 'big-santa' : '';
-  blocks.block00.insertAdjacentHTML('beforeend', `<div class="emoji-static ${santaSize}">🎅🏻</div>`);
-
-  if (isFinalThirty && !deathShown) {
-    deathPopup.style.display = 'block';
-  }
-
-  const delay = 1000 - now.getMilliseconds();
-  setTimeout(updateTimer, delay);
-}
 
 document.addEventListener('visibilitychange', () => {
   if (!document.hidden) {
