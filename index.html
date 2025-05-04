@@ -16,11 +16,11 @@
       height: 100vh;
       margin: 0;
       font-family: Arial, sans-serif;
-      padding-top: 10px;
+      padding-top: 60px; /* More top space */
     }
     table {
       border-collapse: collapse;
-      margin: 0 auto;
+      margin: 40px auto 0 auto; /* Extra space above emojis */
       position: relative;
     }
     td {
@@ -35,21 +35,21 @@
     }
     .emoji-above {
       position: absolute;
-      top: -25px;
+      top: -35px;
       font-size: 18px;
       width: 100%;
       text-align: center;
     }
     .emoji-static {
       position: absolute;
-      top: -25px;
+      top: -35px;
       right: -15px;
       font-size: 18px;
     }
     #timer {
       font-size: var(--timer-font-size, 12vw);
       text-align: center;
-      margin-top: 5px;
+      margin-top: 40px;
     }
     #controls {
       margin-top: 15px;
@@ -243,12 +243,10 @@ function updateTimer() {
   timerDisplay.textContent = timeText;
   document.title = `🎅🏻 ${timeText} TIME TO SPRINT`;
 
-  // Reset emojis
   for (let key in blocks) {
     blocks[key].innerHTML = blocks[key].innerHTML.replace(/<div.*?emoji.*?<\/div>/g, '');
   }
 
-  // Apply colors and emoji to blocks
   const colors = ['yellow', 'yellow', 'yellow', 'yellow'];
   colors[quarter] = 'green';
   for (let i = 0; i < quarter; i++) colors[i] = 'red';
@@ -260,11 +258,9 @@ function updateTimer() {
     el.style.color = textColors[colors[index]];
   });
 
-  // Add runner emoji above current block
   const runner = '<div class="emoji-above">🏃🏻‍♀️</div>';
   blocks[blockKeys[quarter]].insertAdjacentHTML('afterbegin', runner);
 
-  // Add Santa emoji near the :00 block
   const isFinalMinute = minutes === 0 && seconds < 60;
   const santaSize = isFinalMinute ? 'big-santa' : '';
   blocks.block00.insertAdjacentHTML('beforeend', `<div class="emoji-static ${santaSize}">🎅🏻</div>`);
